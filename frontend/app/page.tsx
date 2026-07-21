@@ -4,21 +4,23 @@ import { useEffect, useState } from 'react'
 
 interface Person {
   id: string
-  attributes: {
-    full_name: string
-    status: string
-    photo_thumbnail_url: string
-  }
+  name: string
+  firstName: string
+  lastName: string
+  avatar: string
+  status: string
+  email: string | null
+  phone: string | null
 }
 
 export default function Home() {
   const [people, setPeople] = useState<Person[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:3001/planning-center/members')
-      .then(res => res.json())
-      .then(data => setPeople(data.data))
-  }, [])
+  fetch('http://localhost:3001/planning-center/members')
+    .then(res => res.json())
+    .then(data => setPeople(data))
+}, [])
 
   return (
     <main className="min-h-screen bg-gray-950 text-white p-8">
@@ -63,13 +65,13 @@ export default function Home() {
               people.map((person) => (
                 <div key={person.id} className="flex items-center gap-3 p-3 bg-gray-900 rounded-xl">
                   <img
-                    src={person.attributes.photo_thumbnail_url}
+                    src={person.avatar}
                     className="w-9 h-9 rounded-full object-cover flex-shrink-0"
-                    alt={person.attributes.full_name}
+                    alt={person.name}
                   />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{person.attributes.full_name}</p>
-                    <p className="text-xs text-gray-400">{person.attributes.status}</p>
+                    <p className="text-sm font-medium">{person.name}</p>
+                    <p className="text-xs text-gray-400">{person.email || person.phone || 'No contact info'}</p>
                   </div>
                   <span className="text-xs px-2 py-1 rounded-full bg-green-900 text-green-400">
                     Linked

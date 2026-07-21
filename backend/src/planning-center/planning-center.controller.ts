@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { PlanningCenterService } from './planning-center.service';
+
 
 @Controller('planning-center')
 export class PlanningCenterController {
@@ -23,8 +24,27 @@ export class PlanningCenterController {
 getConnectGroupTags() {
   return this.planningCenterService.getConnectGroupTags();
 }
+
 @Get('members')
 getYA34Members() {
   return this.planningCenterService.getYA34Members();
+}
+
+@Get('person/:id')
+getPersonDetails(@Param('id') id: string) {
+  return this.planningCenterService.getPersonDetails(id);
+}
+
+@Get('upcoming-plans')
+getUpcomingServicePlans() {
+  return this.planningCenterService.getUpcomingServicePlans();
+}
+
+@Get('plan/:serviceTypeId/:planId/team-members')
+getPlanTeamMembers(
+  @Param('serviceTypeId') serviceTypeId: string,
+  @Param('planId') planId: string,
+) {
+  return this.planningCenterService.getPlanTeamMembers(planId, serviceTypeId);
 }
 }
