@@ -47,4 +47,9 @@ getPlanTeamMembers(
 ) {
   return this.planningCenterService.getPlanTeamMembers(planId, serviceTypeId);
 }
+
+@Get('members-with-service')
+getMembersWithServiceStatus() {
+  return this.planningCenterService.getMembersWithServiceStatus();
+}
 }

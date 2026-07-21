@@ -152,4 +152,80 @@ async getPlanTeamMembers(planId: string, serviceTypeId: string) {
   );
   return response.data;
 }
+
+async getMembersWithServiceStatus() {
+  // Step 1: Get all YA3/YA4 members
+  const membersResponse = await firstValueFrom(
+    this.httpService.get(
+      `${this.baseUrl}/services/v2/people?where[tag_ids][]=13786588&where[tag_ids][]=13786589&per_page=100`,
+      { headers: this.getAuthHeader() },
+    ),
+  );
+  const members = membersResponse.data.data;
+
+  // Step 2: Get this Sunday's team members (plan 88802622)
+  const planResponse = await firstValueFrom(
+    this.httpService.get(
+      `${this.baseUrl}/services/v2/service_types/726211/plans/88802622/team_members?per_page=100`,
+      { headers: this.getAuthHeader() },
+    ),
+  );
+  const teamMembers = planResponse.data.data;
+
+  // Step 3: Cross-reference
+  const enriched = await Promise.all(
+    members.map(async (member: any) => {
+      // Find this member in the Sunday plan
+      const serving = teamMembers.filter(
+        (tm: any) => tm.relationships.person.data.id === member.id,
+      );
+
+      // Get their People API profile
+      try {
+        const profileResponse = await firstValueFrom(
+          this.httpService.get(
+            `${this.baseUrl}/people/v2/people/${member.id}?include=emails,phone_numbers`,
+            { headers: this.getAuthHeader() },
+          ),
+        );
+        const profile = profileResponse.data.data;
+        const included = profileResponse.data.included || [];
+        const email = included.find((i: any) => i.type === 'Email')?.attributes?.address || null;
+        const phone = included.find((i: any) => i.type === 'PhoneNumber')?.attributes?.national || null;
+
+        return {
+          id: member.id,
+          name: profile.attributes.name,
+          avatar: profile.attributes.avatar,
+          status: profile.attributes.status,
+          email,
+          phone,
+          servingThisSunday: serving.length > 0,
+          roles: serving.map((s: any) => ({
+            position: s.attributes.team_position_name,
+            status: s.attributes.status === 'C' ? 'Confirmed' : 
+                    s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+          })),
+        };
+      } catch {
+        return {
+          id: member.id,
+          name: member.attributes.full_name,
+          avatar: member.attributes.photo_thumbnail_url,
+          status: member.attributes.status,
+          email: null,
+          phone: null,
+          servingThisSunday: serving.length > 0,
+          roles: serving.map((s: any) => ({
+            position: s.attributes.team_position_name,
+            status: s.attributes.status === 'C' ? 'Confirmed' :
+                    s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+          })),
+        };
+      }
+    }),
+  );
+
+  return enriched;
+}
 }

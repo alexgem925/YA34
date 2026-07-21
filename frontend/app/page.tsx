@@ -2,25 +2,30 @@
 
 import { useEffect, useState } from 'react'
 
+interface Role {
+  position: string
+  status: string
+}
+
 interface Person {
   id: string
   name: string
-  firstName: string
-  lastName: string
   avatar: string
   status: string
   email: string | null
   phone: string | null
+  servingThisSunday: boolean
+  roles: Role[]
 }
 
 export default function Home() {
   const [people, setPeople] = useState<Person[]>([])
 
   useEffect(() => {
-  fetch('http://localhost:3001/planning-center/members')
-    .then(res => res.json())
-    .then(data => setPeople(data))
-}, [])
+    fetch('http://localhost:3001/planning-center/members-with-service')
+      .then(res => res.json())
+      .then(data => setPeople(data))
+  }, [])
 
   return (
     <main className="min-h-screen bg-gray-950 text-white p-8">
@@ -40,8 +45,8 @@ export default function Home() {
       {/* Stat Cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         {[
-          { label: "New this week", value: "8" },
-          { label: "Needs follow-up", value: "3" },
+          { label: "Total members", value: people.length.toString() },
+          { label: "Serving this Sunday", value: people.filter(p => p.servingThisSunday).length.toString() },
           { label: "Upcoming events", value: "2" },
           { label: "Active groups", value: "12" },
         ].map((stat) => (
@@ -55,9 +60,11 @@ export default function Home() {
       {/* Main Grid */}
       <div className="grid grid-cols-2 gap-6">
 
-        {/* People from Planning Center */}
+        {/* Members */}
         <div>
-          <h2 className="text-base font-semibold mb-3">People <span className="text-xs text-gray-400 font-normal">from Planning Center</span></h2>
+          <h2 className="text-base font-semibold mb-3">
+            Members <span className="text-xs text-gray-400 font-normal">YA3 + YA4</span>
+          </h2>
           <div className="flex flex-col gap-3">
             {people.length === 0 ? (
               <p className="text-sm text-gray-400">Loading...</p>
@@ -69,13 +76,26 @@ export default function Home() {
                     className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                     alt={person.name}
                   />
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{person.name}</p>
-                    <p className="text-xs text-gray-400">{person.email || person.phone || 'No contact info'}</p>
+                    <p className="text-xs text-gray-400 truncate">{person.email || person.phone || 'No contact info'}</p>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded-full bg-green-900 text-green-400">
-                    Linked
-                  </span>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    {person.servingThisSunday ? (
+                      <>
+                        <span className="text-xs px-2 py-1 rounded-full bg-blue-900 text-blue-400">
+                          Serving Sunday
+                        </span>
+                        {person.roles.map((role, i) => (
+                          <span key={i} className="text-xs text-gray-400">{role.position} · {role.status}</span>
+                        ))}
+                      </>
+                    ) : (
+                      <span className="text-xs px-2 py-1 rounded-full bg-gray-800 text-gray-400">
+                        Not serving
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             )}
@@ -87,11 +107,11 @@ export default function Home() {
           <h2 className="text-base font-semibold mb-3">Upcoming events</h2>
           <div className="flex flex-col gap-3">
             {[
-              { month: "Jun", day: "24", title: "Group leaders meetup", group: "All groups" },
-              { month: "Jun", day: "28", title: "Newcomer welcome dinner", group: "All groups" },
-              { month: "Jul", day: "3", title: "Connect group social", group: "All groups" },
+              { month: "Jul", day: "26", title: "Sunday Service", group: "9:30am · 43 serving" },
+              { month: "Aug", day: "2", title: "Sunday Service", group: "9:30am · 8 serving" },
+              { month: "Aug", day: "9", title: "Sunday Service", group: "9:30am · 8 serving" },
             ].map((event) => (
-              <div key={event.title} className="flex items-center gap-3 p-3 bg-gray-900 rounded-xl">
+              <div key={event.title + event.day} className="flex items-center gap-3 p-3 bg-gray-900 rounded-xl">
                 <div className="w-10 text-center flex-shrink-0">
                   <p className="text-xs text-gray-400">{event.month}</p>
                   <p className="text-lg font-semibold">{event.day}</p>
