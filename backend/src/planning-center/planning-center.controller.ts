@@ -52,4 +52,19 @@ getPlanTeamMembers(
 getMembersWithServiceStatus() {
   return this.planningCenterService.getMembersWithServiceStatus();
 }
+
+@Get('plan-times')
+getPlanTimes() {
+  return this.planningCenterService.getPlanTimes();
+}
+
+@Get('sunday-plans')
+getSundayPlans() {
+  return this.planningCenterService.getSundayPlans();
+}
+
+@Get('upcoming-events')
+getUpcomingEvents() {
+  return this.planningCenterService.getUpcomingEvents();
+}
 }

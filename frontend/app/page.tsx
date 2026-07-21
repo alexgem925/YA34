@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 interface Role {
   position: string
+  service: string
   status: string
 }
 
@@ -21,11 +22,28 @@ interface Person {
 export default function Home() {
   const [people, setPeople] = useState<Person[]>([])
 
-  useEffect(() => {
-    fetch('http://localhost:3001/planning-center/members-with-service')
-      .then(res => res.json())
-      .then(data => setPeople(data))
-  }, [])
+  interface ServiceTime {
+  id: string
+  title: string
+  peopleCount: number
+}
+
+interface UpcomingEvent {
+  date: string
+  services: ServiceTime[]
+}
+
+const [events, setEvents] = useState<UpcomingEvent[]>([])
+
+useEffect(() => {
+  fetch('http://localhost:3001/planning-center/members-with-service')
+    .then(res => res.json())
+    .then(data => setPeople(data))
+
+  fetch('http://localhost:3001/planning-center/upcoming-events')
+    .then(res => res.json())
+    .then(data => setEvents(data))
+}, [])
 
   return (
     <main className="min-h-screen bg-gray-950 text-white p-8">
@@ -87,7 +105,9 @@ export default function Home() {
                           Serving Sunday
                         </span>
                         {person.roles.map((role, i) => (
-                          <span key={i} className="text-xs text-gray-400">{role.position} · {role.status}</span>
+                          <span key={i} className="text-xs text-gray-400">
+                            {role.service} · {role.position} · {role.status}
+                          </span>
                         ))}
                       </>
                     ) : (
@@ -106,22 +126,26 @@ export default function Home() {
         <div>
           <h2 className="text-base font-semibold mb-3">Upcoming events</h2>
           <div className="flex flex-col gap-3">
-            {[
-              { month: "Jul", day: "26", title: "Sunday Service", group: "9:30am · 43 serving" },
-              { month: "Aug", day: "2", title: "Sunday Service", group: "9:30am · 8 serving" },
-              { month: "Aug", day: "9", title: "Sunday Service", group: "9:30am · 8 serving" },
-            ].map((event) => (
-              <div key={event.title + event.day} className="flex items-center gap-3 p-3 bg-gray-900 rounded-xl">
-                <div className="w-10 text-center flex-shrink-0">
-                  <p className="text-xs text-gray-400">{event.month}</p>
-                  <p className="text-lg font-semibold">{event.day}</p>
+            {events.length === 0 ? (
+              <p className="text-sm text-gray-400">Loading...</p>
+            ) : (
+              events.map((event) => (
+                <div key={event.date} className="p-3 bg-gray-900 rounded-xl">
+                  <p className="text-xs text-gray-400 mb-2">{event.date}</p>
+                  <div className="flex flex-col gap-2">
+                    {event.services.map((service) => (
+                      <div key={service.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">Sunday Service</span>
+                          <span className="text-xs text-gray-400">{service.title}</span>
+                        </div>
+                        <span className="text-xs text-gray-400">{service.peopleCount} serving</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium">{event.title}</p>
-                  <p className="text-xs text-gray-400">{event.group}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

@@ -163,24 +163,35 @@ async getMembersWithServiceStatus() {
   );
   const members = membersResponse.data.data;
 
-  // Step 2: Get this Sunday's team members (plan 88802622)
-  const planResponse = await firstValueFrom(
-    this.httpService.get(
-      `${this.baseUrl}/services/v2/service_types/726211/plans/88802622/team_members?per_page=100`,
-      { headers: this.getAuthHeader() },
+  // Step 2: Get BOTH Sunday plan team members
+  const [plan930Response, plan1130Response] = await Promise.all([
+    firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/726211/plans/88802622/team_members?per_page=100`,
+        { headers: this.getAuthHeader() },
+      ),
     ),
-  );
-  const teamMembers = planResponse.data.data;
+    firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/726211/plans/88802662/team_members?per_page=100`,
+        { headers: this.getAuthHeader() },
+      ),
+    ),
+  ]);
+
+  const teamMembers930 = plan930Response.data.data;
+  const teamMembers1130 = plan1130Response.data.data;
 
   // Step 3: Cross-reference
   const enriched = await Promise.all(
     members.map(async (member: any) => {
-      // Find this member in the Sunday plan
-      const serving = teamMembers.filter(
+      const serving930 = teamMembers930.filter(
+        (tm: any) => tm.relationships.person.data.id === member.id,
+      );
+      const serving1130 = teamMembers1130.filter(
         (tm: any) => tm.relationships.person.data.id === member.id,
       );
 
-      // Get their People API profile
       try {
         const profileResponse = await firstValueFrom(
           this.httpService.get(
@@ -200,12 +211,21 @@ async getMembersWithServiceStatus() {
           status: profile.attributes.status,
           email,
           phone,
-          servingThisSunday: serving.length > 0,
-          roles: serving.map((s: any) => ({
-            position: s.attributes.team_position_name,
-            status: s.attributes.status === 'C' ? 'Confirmed' : 
-                    s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
-          })),
+          servingThisSunday: serving930.length > 0 || serving1130.length > 0,
+          roles: [
+            ...serving930.map((s: any) => ({
+              position: s.attributes.team_position_name,
+              service: '9:30am',
+              status: s.attributes.status === 'C' ? 'Confirmed' :
+                      s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+            })),
+            ...serving1130.map((s: any) => ({
+              position: s.attributes.team_position_name,
+              service: '11:30am',
+              status: s.attributes.status === 'C' ? 'Confirmed' :
+                      s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+            })),
+          ],
         };
       } catch {
         return {
@@ -215,17 +235,81 @@ async getMembersWithServiceStatus() {
           status: member.attributes.status,
           email: null,
           phone: null,
-          servingThisSunday: serving.length > 0,
-          roles: serving.map((s: any) => ({
-            position: s.attributes.team_position_name,
-            status: s.attributes.status === 'C' ? 'Confirmed' :
-                    s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
-          })),
+          servingThisSunday: serving930.length > 0 || serving1130.length > 0,
+          roles: [
+            ...serving930.map((s: any) => ({
+              position: s.attributes.team_position_name,
+              service: '9:30am',
+              status: s.attributes.status === 'C' ? 'Confirmed' :
+                      s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+            })),
+            ...serving1130.map((s: any) => ({
+              position: s.attributes.team_position_name,
+              service: '11:30am',
+              status: s.attributes.status === 'C' ? 'Confirmed' :
+                      s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+            })),
+          ],
         };
       }
     }),
   );
 
   return enriched;
+}
+
+async getPlanTimes() {
+  const response = await firstValueFrom(
+    this.httpService.get(
+      `${this.baseUrl}/services/v2/service_types/726211/plans/88802622/plan_times`,
+      { headers: this.getAuthHeader() },
+    ),
+  );
+  return response.data;
+}
+
+async getSundayPlans() {
+  const response = await firstValueFrom(
+    this.httpService.get(
+      `${this.baseUrl}/services/v2/service_types/726211/plans?filter=future&per_page=20`,
+      { headers: this.getAuthHeader() },
+    ),
+  );
+  return response.data.data.map((p: any) => ({
+    id: p.id,
+    date: p.attributes.dates,
+    title: p.attributes.title,
+    peopleCount: p.attributes.plan_people_count,
+  }));
+}
+async getUpcomingEvents() {
+  const response = await firstValueFrom(
+    this.httpService.get(
+      `${this.baseUrl}/services/v2/service_types/726211/plans?filter=future&per_page=20`,
+      { headers: this.getAuthHeader() },
+    ),
+  );
+
+  const plans = response.data.data.map((p: any) => ({
+    id: p.id,
+    date: p.attributes.dates,
+    shortDate: p.attributes.short_dates,
+    sortDate: p.attributes.sort_date,
+    title: p.attributes.title,
+    peopleCount: p.attributes.plan_people_count,
+  }));
+
+  // Group by date
+  const grouped: Record<string, any[]> = {};
+  for (const plan of plans) {
+    if (!grouped[plan.date]) grouped[plan.date] = [];
+    grouped[plan.date].push(plan);
+  }
+
+  // Return as array sorted by date
+  return Object.entries(grouped).map(([date, services]) => ({
+    date,
+    services: services.sort((a, b) => b.title.localeCompare(a.title)),
+  })).slice(0, 4); // next 4 Sundays
 }
 }
