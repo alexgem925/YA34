@@ -35,4 +35,33 @@ export class PlanningCenterService {
     );
     return response.data;
   }
+
+  async getTagGroups() {
+  const response = await firstValueFrom(
+    this.httpService.get(`${this.baseUrl}/services/v2/tag_groups`, {
+      headers: this.getAuthHeader(),
+    }),
+  );
+  return response.data;
+}
+
+async getConnectGroupTags() {
+  const response = await firstValueFrom(
+    this.httpService.get(`${this.baseUrl}/services/v2/tag_groups/2904352/tags`, {
+      headers: this.getAuthHeader(),
+    }),
+  );
+  return response.data;
+}
+async getYA34Members() {
+  const response = await firstValueFrom(
+    this.httpService.get(
+      `${this.baseUrl}/services/v2/people?where[tag_ids][]=13786588&where[tag_ids][]=13786589`,
+      {
+        headers: this.getAuthHeader(),
+      },
+    ),
+  );
+  return response.data;
+}
 }

@@ -14,4 +14,17 @@ export class PlanningCenterController {
   getGroups() {
     return this.planningCenterService.getGroups();
   }
+
+  @Get('tag-groups')
+    getTagGroups() {
+        return this.planningCenterService.getTagGroups();
+    }
+@Get('connect-group-tags')
+getConnectGroupTags() {
+  return this.planningCenterService.getConnectGroupTags();
+}
+@Get('members')
+getYA34Members() {
+  return this.planningCenterService.getYA34Members();
+}
 }
