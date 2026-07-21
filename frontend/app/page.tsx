@@ -1,7 +1,28 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
+interface Person {
+  id: string
+  attributes: {
+    full_name: string
+    status: string
+    photo_thumbnail_url: string
+  }
+}
+
 export default function Home() {
+  const [people, setPeople] = useState<Person[]>([])
+
+  useEffect(() => {
+    fetch('http://localhost:3001/planning-center/members')
+      .then(res => res.json())
+      .then(data => setPeople(data.data))
+  }, [])
+
   return (
     <main className="min-h-screen bg-gray-950 text-white p-8">
-      
+
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
@@ -31,34 +52,31 @@ export default function Home() {
 
       {/* Main Grid */}
       <div className="grid grid-cols-2 gap-6">
-        
-        {/* Newcomers */}
+
+        {/* People from Planning Center */}
         <div>
-          <h2 className="text-base font-semibold mb-3">Recent newcomers</h2>
+          <h2 className="text-base font-semibold mb-3">People <span className="text-xs text-gray-400 font-normal">from Planning Center</span></h2>
           <div className="flex flex-col gap-3">
-            {[
-              { name: "Jordan Mills", visited: "Jun 15", status: "Needs review" },
-              { name: "Asha Patel", visited: "Jun 8", status: "Linked" },
-              { name: "Tyler Brooks", visited: "Jun 1", status: "Needs review" },
-              { name: "Maria Gomez", visited: "May 25", status: "Linked" },
-            ].map((person) => (
-              <div key={person.name} className="flex items-center gap-3 p-3 bg-gray-900 rounded-xl">
-                <div className="w-9 h-9 rounded-full bg-gray-700 flex items-center justify-center text-xs font-semibold flex-shrink-0">
-                  {person.name.split(" ").map((n) => n[0]).join("")}
+            {people.length === 0 ? (
+              <p className="text-sm text-gray-400">Loading...</p>
+            ) : (
+              people.map((person) => (
+                <div key={person.id} className="flex items-center gap-3 p-3 bg-gray-900 rounded-xl">
+                  <img
+                    src={person.attributes.photo_thumbnail_url}
+                    className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                    alt={person.attributes.full_name}
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{person.attributes.full_name}</p>
+                    <p className="text-xs text-gray-400">{person.attributes.status}</p>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full bg-green-900 text-green-400">
+                    Linked
+                  </span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{person.name}</p>
-                  <p className="text-xs text-gray-400">Visited {person.visited}</p>
-                </div>
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  person.status === "Linked"
-                    ? "bg-green-900 text-green-400"
-                    : "bg-yellow-900 text-yellow-400"
-                }`}>
-                  {person.status}
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
