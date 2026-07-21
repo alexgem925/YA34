@@ -199,12 +199,12 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-6">
 
           {/* Members */}
-          <div className="rounded-2xl bg-gray-900/40 backdrop-blur border border-white/5 p-5">
+          <div className="rounded-2xl bg-gray-900/40 backdrop-blur border border-white/5 p-5 h-[600px] flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold">Members</h2>
               <span className="text-xs text-gray-300 bg-linear-to-r from-fuchsia-500/20 to-violet-500/20 ring-1 ring-white/10 rounded-full px-2 py-0.5">YA3 + YA4</span>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 pr-1">
               {!peopleLoaded ? (
                 <>
                   <SkeletonRow />
@@ -225,7 +225,7 @@ export default function Home() {
                       <p className="text-sm font-medium truncate">{person.name}</p>
                       <p className="text-xs text-gray-500 truncate">{person.email || person.phone || 'No contact info'}</p>
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
+                    <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 pr-1">
                       {person.servingThisSunday ? (
                         <>
                           <span className="text-xs px-2 py-0.5 rounded-full bg-linear-to-r from-emerald-500 to-teal-500 text-white font-medium shadow-sm shadow-emerald-500/30">
