@@ -283,33 +283,54 @@ async getSundayPlans() {
   }));
 }
 async getUpcomingEvents() {
-  const response = await firstValueFrom(
-    this.httpService.get(
-      `${this.baseUrl}/services/v2/service_types/726211/plans?filter=future&per_page=20`,
-      { headers: this.getAuthHeader() },
+  const [mainResponse, northResponse] = await Promise.all([
+    firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/726211/plans?filter=future&per_page=20`,
+        { headers: this.getAuthHeader() },
+      ),
     ),
-  );
+    firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/1793098/plans?filter=future&per_page=20`,
+        { headers: this.getAuthHeader() },
+      ),
+    ),
+  ]);
 
-  const plans = response.data.data.map((p: any) => ({
-    id: p.id,
-    date: p.attributes.dates,
-    shortDate: p.attributes.short_dates,
-    sortDate: p.attributes.sort_date,
-    title: p.attributes.title,
-    peopleCount: p.attributes.plan_people_count,
-  }));
+  const allPlans = [
+    ...mainResponse.data.data.map((p: any) => ({
+      id: p.id,
+      date: p.attributes.dates,
+      sortDate: p.attributes.sort_date,
+      title: p.attributes.title,
+      serviceType: 'Sunday Service',
+      peopleCount: p.attributes.plan_people_count,
+    })),
+    ...northResponse.data.data.map((p: any) => ({
+      id: p.id,
+      date: p.attributes.dates,
+      sortDate: p.attributes.sort_date,
+      title: p.attributes.title,
+      serviceType: 'North Sunday Service',
+      peopleCount: p.attributes.plan_people_count,
+    })),
+  ];
 
   // Group by date
   const grouped: Record<string, any[]> = {};
-  for (const plan of plans) {
+  for (const plan of allPlans) {
     if (!grouped[plan.date]) grouped[plan.date] = [];
     grouped[plan.date].push(plan);
   }
 
-  // Return as array sorted by date
-  return Object.entries(grouped).map(([date, services]) => ({
-    date,
-    services: services.sort((a, b) => b.title.localeCompare(a.title)),
-  })).slice(0, 4); // next 4 Sundays
+  // Sort by date and return next 4
+  return Object.entries(grouped)
+    .sort(([, a], [, b]) => new Date(a[0].sortDate).getTime() - new Date(b[0].sortDate).getTime())
+    .slice(0, 4)
+    .map(([date, services]) => ({
+      date,
+      services: services.sort((a, b) => b.title.localeCompare(a.title)),
+    }));
 }
 }

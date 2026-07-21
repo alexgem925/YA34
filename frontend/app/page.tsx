@@ -25,6 +25,7 @@ export default function Home() {
   interface ServiceTime {
   id: string
   title: string
+  serviceType: string
   peopleCount: number
 }
 
@@ -136,7 +137,7 @@ useEffect(() => {
                     {event.services.map((service) => (
                       <div key={service.id} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">Sunday Service</span>
+                          <span className="text-sm font-medium">{service.serviceType}</span>
                           <span className="text-xs text-gray-400">{service.title}</span>
                         </div>
                         <span className="text-xs text-gray-400">{service.peopleCount} serving</span>
