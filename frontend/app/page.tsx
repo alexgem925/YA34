@@ -125,7 +125,6 @@ const STAT_META = [
   { label: 'Total members', icon: <UsersIcon />, grad: 'from-sky-500 to-cyan-400', glow: 'shadow-cyan-500/20' },
   { label: 'Serving this Sunday', icon: <CheckBadgeIcon />, grad: 'from-emerald-400 to-teal-500', glow: 'shadow-emerald-500/20' },
   { label: 'Upcoming events', icon: <CalendarIcon />, grad: 'from-amber-400 to-orange-500', glow: 'shadow-amber-500/20' },
-  { label: 'Active groups', icon: <GroupIcon />, grad: 'from-fuchsia-500 to-pink-500', glow: 'shadow-fuchsia-500/20' },
 ]
 
 export default function Home() {
@@ -177,14 +176,10 @@ export default function Home() {
               <p className="text-xs text-gray-400">Leader dashboard</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-gray-900/80 backdrop-blur border border-white/10">
-            <Avatar name="Sam Lee" src={null} seed="sam-lee" />
-            <span className="text-sm font-medium">Sam Lee</span>
-          </div>
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {STAT_META.map((stat, i) => (
             <div
               key={stat.label}
