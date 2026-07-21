@@ -8,6 +8,19 @@ export class PlanningCenterService {
   private readonly appId = process.env.PLANNING_CENTER_APP_ID;
   private readonly secret = process.env.PLANNING_CENTER_SECRET;
 
+  // Tag IDs for YA3 and YA4 connect groups
+  private readonly YA3_TAG_ID = '13786588';
+  private readonly YA4_TAG_ID = '13786589';
+
+  // Service type IDs
+  private readonly SUNDAY_SERVICE_ID = '726211';
+  private readonly NORTH_SUNDAY_SERVICE_ID = '1793098';
+
+  // This Sunday's plan IDs (9:30am and 11:30am)
+  // TODO: make dynamic by fetching the next upcoming plan
+  private readonly PLAN_930_ID = '88802622';
+  private readonly PLAN_1130_ID = '88802662';
+
   constructor(private readonly httpService: HttpService) {}
 
   private getAuthHeader() {
@@ -18,319 +31,170 @@ export class PlanningCenterService {
     };
   }
 
-  async getPeople() {
-    const response = await firstValueFrom(
-      this.httpService.get(`${this.baseUrl}/people/v2/people`, {
-        headers: this.getAuthHeader(),
-      }),
+  async getMembersWithServiceStatus() {
+    // Step 1: Get all YA3/YA4 tagged members from Services
+    const membersResponse = await firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/people?where[tag_ids][]=${this.YA3_TAG_ID}&where[tag_ids][]=${this.YA4_TAG_ID}&per_page=100`,
+        { headers: this.getAuthHeader() },
+      ),
     );
-    return response.data;
-  }
+    const members = membersResponse.data.data;
 
-  async getGroups() {
-    const response = await firstValueFrom(
-      this.httpService.get(`${this.baseUrl}/groups/v2/groups`, {
-        headers: this.getAuthHeader(),
-      }),
-    );
-    return response.data;
-  }
-
-  async getTagGroups() {
-  const response = await firstValueFrom(
-    this.httpService.get(`${this.baseUrl}/services/v2/tag_groups`, {
-      headers: this.getAuthHeader(),
-    }),
-  );
-  return response.data;
-}
-
-async getConnectGroupTags() {
-  const response = await firstValueFrom(
-    this.httpService.get(`${this.baseUrl}/services/v2/tag_groups/2904352/tags`, {
-      headers: this.getAuthHeader(),
-    }),
-  );
-  return response.data;
-}
-async getYA34Members() {
-  // Step 1: Get all YA3/YA4 tagged members from Services
-  const servicesResponse = await firstValueFrom(
-    this.httpService.get(
-      `${this.baseUrl}/services/v2/people?where[tag_ids][]=13786588&where[tag_ids][]=13786589&per_page=100`,
-      { headers: this.getAuthHeader() },
-    ),
-  );
-
-  const servicesPeople = servicesResponse.data.data;
-
-  // Step 2: For each person, fetch their full People API profile
-  const enrichedPeople = await Promise.all(
-    servicesPeople.map(async (person: any) => {
-      try {
-        const peopleResponse = await firstValueFrom(
-          this.httpService.get(
-            `${this.baseUrl}/people/v2/people/${person.id}?include=emails,phone_numbers`,
-            { headers: this.getAuthHeader() },
-          ),
-        );
-
-        const profile = peopleResponse.data.data;
-        const included = peopleResponse.data.included || [];
-
-        const email = included.find((i: any) => i.type === 'Email')?.attributes?.address || null;
-        const phone = included.find((i: any) => i.type === 'PhoneNumber')?.attributes?.national || null;
-
-        return {
-          id: person.id,
-          name: profile.attributes.name,
-          firstName: profile.attributes.first_name,
-          lastName: profile.attributes.last_name,
-          avatar: profile.attributes.avatar,
-          status: profile.attributes.status,
-          email,
-          phone,
-        };
-      } catch {
-        return {
-          id: person.id,
-          name: person.attributes.full_name,
-          firstName: person.attributes.first_name,
-          lastName: person.attributes.last_name,
-          avatar: person.attributes.photo_thumbnail_url,
-          status: person.attributes.status,
-          email: null,
-          phone: null,
-        };
-      }
-    }),
-  );
-
-  return enrichedPeople;
-}
-
-async getPersonDetails(personId: string) {
-  const response = await firstValueFrom(
-    this.httpService.get(
-      `${this.baseUrl}/people/v2/people/${personId}?include=emails,phone_numbers,addresses`,
-      {
-        headers: this.getAuthHeader(),
-      },
-    ),
-  );
-  return response.data;
-}
-
-async getUpcomingServicePlans() {
-  const serviceTypeIds = ['726211', '1793098']
-  
-  const plans = await Promise.all(
-    serviceTypeIds.map(async (id) => {
-      const response = await firstValueFrom(
+    // Step 2: Get team members for both Sunday services
+    const [plan930Response, plan1130Response] = await Promise.all([
+      firstValueFrom(
         this.httpService.get(
-          `${this.baseUrl}/services/v2/service_types/${id}/plans?filter=future&per_page=3&include=team_members`,
+          `${this.baseUrl}/services/v2/service_types/${this.SUNDAY_SERVICE_ID}/plans/${this.PLAN_930_ID}/team_members?per_page=100`,
           { headers: this.getAuthHeader() },
         ),
-      );
-      return {
-        serviceType: id === '726211' ? 'Sunday Service' : 'North Sunday Service',
-        plans: response.data.data,
-        included: response.data.included,
-      };
-    }),
-  );
-
-  return plans;
-}
-
-async getPlanTeamMembers(planId: string, serviceTypeId: string) {
-  const response = await firstValueFrom(
-    this.httpService.get(
-      `${this.baseUrl}/services/v2/service_types/${serviceTypeId}/plans/${planId}/team_members`,
-      { headers: this.getAuthHeader() },
-    ),
-  );
-  return response.data;
-}
-
-async getMembersWithServiceStatus() {
-  // Step 1: Get all YA3/YA4 members
-  const membersResponse = await firstValueFrom(
-    this.httpService.get(
-      `${this.baseUrl}/services/v2/people?where[tag_ids][]=13786588&where[tag_ids][]=13786589&per_page=100`,
-      { headers: this.getAuthHeader() },
-    ),
-  );
-  const members = membersResponse.data.data;
-
-  // Step 2: Get BOTH Sunday plan team members
-  const [plan930Response, plan1130Response] = await Promise.all([
-    firstValueFrom(
-      this.httpService.get(
-        `${this.baseUrl}/services/v2/service_types/726211/plans/88802622/team_members?per_page=100`,
-        { headers: this.getAuthHeader() },
       ),
-    ),
-    firstValueFrom(
-      this.httpService.get(
-        `${this.baseUrl}/services/v2/service_types/726211/plans/88802662/team_members?per_page=100`,
-        { headers: this.getAuthHeader() },
+      firstValueFrom(
+        this.httpService.get(
+          `${this.baseUrl}/services/v2/service_types/${this.SUNDAY_SERVICE_ID}/plans/${this.PLAN_1130_ID}/team_members?per_page=100`,
+          { headers: this.getAuthHeader() },
+        ),
       ),
-    ),
-  ]);
+    ]);
 
-  const teamMembers930 = plan930Response.data.data;
-  const teamMembers1130 = plan1130Response.data.data;
+    const teamMembers930 = plan930Response.data.data;
+    const teamMembers1130 = plan1130Response.data.data;
 
-  // Step 3: Cross-reference
-  const enriched = await Promise.all(
-    members.map(async (member: any) => {
-      const serving930 = teamMembers930.filter(
-        (tm: any) => tm.relationships.person.data.id === member.id,
-      );
-      const serving1130 = teamMembers1130.filter(
-        (tm: any) => tm.relationships.person.data.id === member.id,
-      );
-
-      try {
-        const profileResponse = await firstValueFrom(
-          this.httpService.get(
-            `${this.baseUrl}/people/v2/people/${member.id}?include=emails,phone_numbers`,
-            { headers: this.getAuthHeader() },
-          ),
+    // Step 3: Enrich each member with their People profile and service status
+    const enriched = await Promise.all(
+      members.map(async (member: any) => {
+        const serving930 = teamMembers930.filter(
+          (tm: any) => tm.relationships.person.data.id === member.id,
         );
-        const profile = profileResponse.data.data;
-        const included = profileResponse.data.included || [];
-        const email = included.find((i: any) => i.type === 'Email')?.attributes?.address || null;
-        const phone = included.find((i: any) => i.type === 'PhoneNumber')?.attributes?.national || null;
+        const serving1130 = teamMembers1130.filter(
+          (tm: any) => tm.relationships.person.data.id === member.id,
+        );
 
-        return {
-          id: member.id,
-          name: profile.attributes.name,
-          avatar: profile.attributes.avatar,
-          status: profile.attributes.status,
-          email,
-          phone,
-          servingThisSunday: serving930.length > 0 || serving1130.length > 0,
-          roles: [
-            ...serving930.map((s: any) => ({
-              position: s.attributes.team_position_name,
-              service: '9:30am',
-              status: s.attributes.status === 'C' ? 'Confirmed' :
-                      s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
-            })),
-            ...serving1130.map((s: any) => ({
-              position: s.attributes.team_position_name,
-              service: '11:30am',
-              status: s.attributes.status === 'C' ? 'Confirmed' :
-                      s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
-            })),
-          ],
-        };
-      } catch {
-        return {
-          id: member.id,
-          name: member.attributes.full_name,
-          avatar: member.attributes.photo_thumbnail_url,
-          status: member.attributes.status,
-          email: null,
-          phone: null,
-          servingThisSunday: serving930.length > 0 || serving1130.length > 0,
-          roles: [
-            ...serving930.map((s: any) => ({
-              position: s.attributes.team_position_name,
-              service: '9:30am',
-              status: s.attributes.status === 'C' ? 'Confirmed' :
-                      s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
-            })),
-            ...serving1130.map((s: any) => ({
-              position: s.attributes.team_position_name,
-              service: '11:30am',
-              status: s.attributes.status === 'C' ? 'Confirmed' :
-                      s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
-            })),
-          ],
-        };
-      }
-    }),
-  );
+        try {
+          const profileResponse = await firstValueFrom(
+            this.httpService.get(
+              `${this.baseUrl}/people/v2/people/${member.id}?include=emails,phone_numbers`,
+              { headers: this.getAuthHeader() },
+            ),
+          );
+          const profile = profileResponse.data.data;
+          const included = profileResponse.data.included || [];
+          const email = included.find((i: any) => i.type === 'Email')?.attributes?.address || null;
+          const phone = included.find((i: any) => i.type === 'PhoneNumber')?.attributes?.national || null;
 
-  return enriched;
-}
+          return {
+            id: member.id,
+            name: profile.attributes.name,
+            avatar: profile.attributes.avatar,
+            status: profile.attributes.status,
+            email,
+            phone,
+            servingThisSunday: serving930.length > 0 || serving1130.length > 0,
+            roles: [
+              ...serving930.map((s: any) => ({
+                position: s.attributes.team_position_name,
+                service: '9:30am',
+                status: s.attributes.status === 'C' ? 'Confirmed' :
+                        s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+              })),
+              ...serving1130.map((s: any) => ({
+                position: s.attributes.team_position_name,
+                service: '11:30am',
+                status: s.attributes.status === 'C' ? 'Confirmed' :
+                        s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+              })),
+            ],
+          };
+        } catch {
+          return {
+            id: member.id,
+            name: member.attributes.full_name,
+            avatar: member.attributes.photo_thumbnail_url,
+            status: member.attributes.status,
+            email: null,
+            phone: null,
+            servingThisSunday: serving930.length > 0 || serving1130.length > 0,
+            roles: [
+              ...serving930.map((s: any) => ({
+                position: s.attributes.team_position_name,
+                service: '9:30am',
+                status: s.attributes.status === 'C' ? 'Confirmed' :
+                        s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+              })),
+              ...serving1130.map((s: any) => ({
+                position: s.attributes.team_position_name,
+                service: '11:30am',
+                status: s.attributes.status === 'C' ? 'Confirmed' :
+                        s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+              })),
+            ],
+          };
+        }
+      }),
+    );
 
-async getPlanTimes() {
-  const response = await firstValueFrom(
-    this.httpService.get(
-      `${this.baseUrl}/services/v2/service_types/726211/plans/88802622/plan_times`,
-      { headers: this.getAuthHeader() },
-    ),
-  );
-  return response.data;
-}
-
-async getSundayPlans() {
-  const response = await firstValueFrom(
-    this.httpService.get(
-      `${this.baseUrl}/services/v2/service_types/726211/plans?filter=future&per_page=20`,
-      { headers: this.getAuthHeader() },
-    ),
-  );
-  return response.data.data.map((p: any) => ({
-    id: p.id,
-    date: p.attributes.dates,
-    title: p.attributes.title,
-    peopleCount: p.attributes.plan_people_count,
-  }));
-}
-async getUpcomingEvents() {
-  const [mainResponse, northResponse] = await Promise.all([
-    firstValueFrom(
-      this.httpService.get(
-        `${this.baseUrl}/services/v2/service_types/726211/plans?filter=future&per_page=20`,
-        { headers: this.getAuthHeader() },
-      ),
-    ),
-    firstValueFrom(
-      this.httpService.get(
-        `${this.baseUrl}/services/v2/service_types/1793098/plans?filter=future&per_page=20`,
-        { headers: this.getAuthHeader() },
-      ),
-    ),
-  ]);
-
-  const allPlans = [
-    ...mainResponse.data.data.map((p: any) => ({
-      id: p.id,
-      date: p.attributes.dates,
-      sortDate: p.attributes.sort_date,
-      title: p.attributes.title,
-      serviceType: 'Sunday Service',
-      peopleCount: p.attributes.plan_people_count,
-    })),
-    ...northResponse.data.data.map((p: any) => ({
-      id: p.id,
-      date: p.attributes.dates,
-      sortDate: p.attributes.sort_date,
-      title: p.attributes.title,
-      serviceType: 'North Sunday Service',
-      peopleCount: p.attributes.plan_people_count,
-    })),
-  ];
-
-  // Group by date
-  const grouped: Record<string, any[]> = {};
-  for (const plan of allPlans) {
-    if (!grouped[plan.date]) grouped[plan.date] = [];
-    grouped[plan.date].push(plan);
+    return enriched;
   }
 
-  // Sort by date and return next 4
-  return Object.entries(grouped)
-    .sort(([, a], [, b]) => new Date(a[0].sortDate).getTime() - new Date(b[0].sortDate).getTime())
-    .slice(0, 4)
-    .map(([date, services]) => ({
-      date,
-      services: services.sort((a, b) => b.title.localeCompare(a.title)),
-    }));
-}
+  async getUpcomingEvents() {
+    const [mainResponse, northResponse] = await Promise.all([
+      firstValueFrom(
+        this.httpService.get(
+          `${this.baseUrl}/services/v2/service_types/${this.SUNDAY_SERVICE_ID}/plans?filter=future&per_page=20`,
+          { headers: this.getAuthHeader() },
+        ),
+      ),
+      firstValueFrom(
+        this.httpService.get(
+          `${this.baseUrl}/services/v2/service_types/${this.NORTH_SUNDAY_SERVICE_ID}/plans?filter=future&per_page=20`,
+          { headers: this.getAuthHeader() },
+        ),
+      ),
+    ]);
+
+    const allPlans = [
+      ...mainResponse.data.data.map((p: any) => ({
+        id: p.id,
+        date: p.attributes.dates,
+        sortDate: p.attributes.sort_date,
+        title: p.attributes.title,
+        serviceType: 'Sunday Service',
+        peopleCount: p.attributes.plan_people_count,
+      })),
+      ...northResponse.data.data.map((p: any) => ({
+        id: p.id,
+        date: p.attributes.dates,
+        sortDate: p.attributes.sort_date,
+        title: p.attributes.title,
+        serviceType: 'North Sunday Service',
+        peopleCount: p.attributes.plan_people_count,
+      })),
+    ];
+
+    // Group by date
+    const grouped: Record<string, any[]> = {};
+    for (const plan of allPlans) {
+      if (!grouped[plan.date]) grouped[plan.date] = [];
+      grouped[plan.date].push(plan);
+    }
+
+    // Sort by date and return next 4
+    return Object.entries(grouped)
+      .sort(([, a], [, b]) => new Date(a[0].sortDate).getTime() - new Date(b[0].sortDate).getTime())
+      .slice(0, 4)
+      .map(([date, services]) => ({
+        date,
+        services: services.sort((a, b) => b.title.localeCompare(a.title)),
+      }));
+  }
+
+  async getPersonDetails(personId: string) {
+    const response = await firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/people/v2/people/${personId}?include=emails,phone_numbers,addresses`,
+        { headers: this.getAuthHeader() },
+      ),
+    );
+    return response.data;
+  }
 }
