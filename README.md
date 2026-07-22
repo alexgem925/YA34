@@ -2,7 +2,7 @@
 
 > Helping Young Adults 34 turn newcomers into connected community.
 
-YA34 is an internal hub app for YA34 connect group leaders. It centralises planning for CGs and after-service lunches by pulling together data from two sources — **Planning Center** (Ministries) and **Genesis** (the YA34 newcomer database) — into a single place where leaders can plan, track, and act.
+YA34 is an internal hub app for YA34 connect group leaders. It centralises planning for CGs and after-service lunches by pulling together data from two sources — **Planning Center** (Ministries) and **Genesis** (the MVMT church newcomer database) — into a single place where leaders can plan, track, and act.
 
 ---
 
