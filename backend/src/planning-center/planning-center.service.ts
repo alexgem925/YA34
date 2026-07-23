@@ -245,4 +245,36 @@ export class PlanningCenterService {
     );
     return response.data;
   }
+  
+  async getAllServicePlans() {
+  const [mainResponse, northResponse] = await Promise.all([
+    firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/${this.SUNDAY_SERVICE_ID}/plans?filter=future&per_page=50`,
+        { headers: this.getAuthHeader() },
+      ),
+    ),
+    firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/${this.NORTH_SUNDAY_SERVICE_ID}/plans?filter=future&per_page=50`,
+        { headers: this.getAuthHeader() },
+      ),
+    ),
+  ]);
+
+  return [
+    ...mainResponse.data.data.map((p: any) => ({
+      id: p.id,
+      date: p.attributes.sort_date,
+      title: p.attributes.title || 'Sunday Service',
+      serviceType: 'Sunday Service',
+    })),
+    ...northResponse.data.data.map((p: any) => ({
+      id: p.id,
+      date: p.attributes.sort_date,
+      title: p.attributes.title || 'North Sunday',
+      serviceType: 'North Sunday Service',
+    })),
+  ];
+}
 }

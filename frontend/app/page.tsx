@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link' 
 
 interface Role {
   position: string
@@ -133,37 +134,32 @@ const STAT_META = [
 function TopNav() {
   return (
     <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
-      <div className="relative max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between gap-4">
+      <div className="relative px-6 md:px-10 h-16 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2.5 shrink-0">
           <div className="w-8 h-8 rounded-md bg-gray-900 flex items-center justify-center text-white text-sm font-bold">
             Y
           </div>
           <span className="text-sm font-bold tracking-tight text-gray-900">YA34</span>
         </div>
-
         <nav className="hidden md:flex items-center gap-1 ml-8">
-          {NAV_ITEMS.map((item) => {
-            const active = item === 'Dashboard'
-            return (
-              <button
-                key={item}
-                type="button"
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  active ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                {item}
-              </button>
-            )
-          })}
+          {[
+            { label: 'Dashboard', href: '/' },
+            { label: 'Members', href: '/members' },
+            { label: 'Calendar', href: '/calendar' },
+            { label: 'CG Plan', href: '/cg-plan' },
+          ].map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                item.label === 'Dashboard' ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
-
-        <button type="button" className="flex items-center gap-2 shrink-0 pl-1.5 pr-2 py-1 rounded-md hover:bg-gray-50 transition-colors">
-          <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-xs font-bold">
-            JC
-          </div>
-          <ChevronDownIcon />
-        </button>
+        <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-xs font-bold">JC</div>
       </div>
     </header>
   )
@@ -245,7 +241,7 @@ export default function Home() {
                     <Avatar name={person.name} src={person.avatar} seed={person.id} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold truncate text-gray-900">{person.name}</p>
-                      <p className="text-xs text-gray-400 truncate">{person.email || person.phone || 'No contact info'}</p>
+
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       {person.servingThisSunday ? (
@@ -299,7 +295,6 @@ export default function Home() {
               ) : (
                 events.map((event) => {
                   const accent = accentFor(event.date)
-                  const eventMax = Math.max(...event.services.map((s) => s.peopleCount), 1)
                   return (
                     <div key={event.date} className={`border-l-2 ${accent.solid.replace('bg-', 'border-')} pl-3.5 py-3 pr-3.5 bg-gray-50 rounded-r-md`}>
                       <p className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-2.5">{event.date}</p>

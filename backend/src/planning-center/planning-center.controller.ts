@@ -19,4 +19,10 @@ export class PlanningCenterController {
   getPersonDetails(@Param('id') id: string) {
     return this.planningCenterService.getPersonDetails(id);
   }
+
+  @Get('all-plans')
+  getAllServicePlans() {
+    return this.planningCenterService.getAllServicePlans();
+  }
+  
 }
