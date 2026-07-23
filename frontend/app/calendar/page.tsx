@@ -81,13 +81,18 @@ export default function CalendarPage() {
 
   // Build event map keyed by day number
   const eventMap = new Map<number, PlanEvent[]>()
-  events.forEach(event => {
+    events.forEach(event => {
     const [year, month, day] = event.date.split('T')[0].split('-').map(Number)
     if (month - 1 === currentMonth && year === currentYear) {
-      if (!eventMap.has(day)) eventMap.set(day, [])
-      eventMap.get(day)!.push(event)
+        if (!eventMap.has(day)) eventMap.set(day, [])
+        eventMap.get(day)!.push(event)
     }
-  })
+    })
+
+    // Sort events within each day by time
+    eventMap.forEach((dayEvents, day) => {
+    eventMap.set(day, dayEvents.sort((a, b) => a.date.localeCompare(b.date)))
+    })
 
   const cells: (number | null)[] = [
     ...Array(firstDay).fill(null),

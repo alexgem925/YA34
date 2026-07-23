@@ -255,6 +255,15 @@ export class PlanningCenterService {
   );
   const ya34MemberIds = new Set(membersResponse.data.data.map((m: any) => m.id));
 
+  const now = new Date();
+  const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const twoMonthsAhead = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+
+  const shouldFetchMembers = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date >= oneMonthAgo && date <= twoMonthsAhead;
+  };
+
   const serviceTypes = [
     { id: this.SUNDAY_SERVICE_ID, name: 'Sunday Service' },
     { id: this.NORTH_SUNDAY_SERVICE_ID, name: 'North Sunday Service' },
@@ -267,20 +276,31 @@ export class PlanningCenterService {
       const [futureRes, pastRes] = await Promise.all([
         firstValueFrom(
           this.httpService.get(
-            `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=future&per_page=25`,
+            `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=future&per_page=10`,
             { headers: this.getAuthHeader() },
           ),
         ),
         firstValueFrom(
           this.httpService.get(
-            `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=past&per_page=100&order=-sort_date`,
+            `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=past&per_page=15&order=-sort_date`,
             { headers: this.getAuthHeader() },
           ),
         ),
       ]);
 
-      // Fetch team members only for future plans
-      const futurePlans = await Promise.all(futureRes.data.data.map(async (p: any) => {
+      const allPlans = [...futureRes.data.data, ...pastRes.data.data];
+
+      return Promise.all(allPlans.map(async (p: any) => {
+        if (!shouldFetchMembers(p.attributes.sort_date)) {
+          return {
+            id: p.id,
+            date: p.attributes.sort_date,
+            title: p.attributes.title || type.name,
+            serviceType: type.name,
+            members: [],
+          };
+        }
+
         try {
           const teamRes = await firstValueFrom(
             this.httpService.get(
@@ -314,17 +334,6 @@ export class PlanningCenterService {
           };
         }
       }));
-
-      // Past plans — no team member fetch needed
-      const pastPlans = pastRes.data.data.map((p: any) => ({
-        id: p.id,
-        date: p.attributes.sort_date,
-        title: p.attributes.title || type.name,
-        serviceType: type.name,
-        members: [],
-      }));
-
-      return [...futurePlans, ...pastPlans];
     })
   );
 
