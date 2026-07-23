@@ -245,36 +245,31 @@ export class PlanningCenterService {
     );
     return response.data;
   }
-  
-  async getAllServicePlans() {
-  const [mainResponse, northResponse] = await Promise.all([
-    firstValueFrom(
-      this.httpService.get(
-        `${this.baseUrl}/services/v2/service_types/${this.SUNDAY_SERVICE_ID}/plans?filter=future&per_page=50`,
-        { headers: this.getAuthHeader() },
-      ),
-    ),
-    firstValueFrom(
-      this.httpService.get(
-        `${this.baseUrl}/services/v2/service_types/${this.NORTH_SUNDAY_SERVICE_ID}/plans?filter=future&per_page=50`,
-        { headers: this.getAuthHeader() },
-      ),
-    ),
-  ]);
 
-  return [
-    ...mainResponse.data.data.map((p: any) => ({
-      id: p.id,
-      date: p.attributes.sort_date,
-      title: p.attributes.title || 'Sunday Service',
-      serviceType: 'Sunday Service',
-    })),
-    ...northResponse.data.data.map((p: any) => ({
-      id: p.id,
-      date: p.attributes.sort_date,
-      title: p.attributes.title || 'North Sunday',
-      serviceType: 'North Sunday Service',
-    })),
+  async getAllServicePlans() {
+  const serviceTypes = [
+    { id: this.SUNDAY_SERVICE_ID, name: 'Sunday Service' },
+    { id: this.NORTH_SUNDAY_SERVICE_ID, name: 'North Sunday Service' },
+    { id: '1781223', name: 'Discipleship' },
+    { id: '1781224', name: 'Monday Leaders Discipleship' },
   ];
+
+  const responses = await Promise.all(
+    serviceTypes.map(type =>
+      firstValueFrom(
+        this.httpService.get(
+          `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=future&per_page=50`,
+          { headers: this.getAuthHeader() },
+        ),
+      ).then(res => res.data.data.map((p: any) => ({
+        id: p.id,
+        date: p.attributes.sort_date,
+        title: p.attributes.title || type.name,
+        serviceType: type.name,
+      })))
+    )
+  );
+
+  return responses.flat();
 }
 }

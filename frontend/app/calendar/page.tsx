@@ -131,7 +131,7 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden h-[calc(100vh-220px)]">
           <div className="grid grid-cols-7 border-b border-gray-200">
             {DAYS.map(day => (
               <div key={day} className="py-3 text-center text-xs font-bold uppercase tracking-wider text-gray-400">
@@ -140,7 +140,7 @@ export default function CalendarPage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-7">
+          <div className="grid grid-cols-7 h-full">
             {cells.map((day, i) => {
               const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()
               const dayEvents = day ? eventMap.get(day) : undefined
@@ -148,7 +148,7 @@ export default function CalendarPage() {
               return (
                 <div
                   key={i}
-                  className={`min-h-[100px] p-2 border-b border-r border-gray-100 ${!day ? 'bg-gray-50' : 'hover:bg-gray-50 transition-colors'}`}
+                  className={`min-h-0 h-full p-2 border-b border-r border-gray-100 ${!day ? 'bg-gray-50' : 'hover:bg-gray-50 transition-colors'}`}
                 >
                   {day && (
                     <>
