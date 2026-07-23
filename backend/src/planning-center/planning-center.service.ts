@@ -247,6 +247,15 @@ export class PlanningCenterService {
   }
 
   async getAllServicePlans() {
+  // Get YA34 members first
+  const membersResponse = await firstValueFrom(
+    this.httpService.get(
+      `${this.baseUrl}/services/v2/people?where[tag_ids][]=${this.YA3_TAG_ID}&where[tag_ids][]=${this.YA4_TAG_ID}&per_page=100`,
+      { headers: this.getAuthHeader() },
+    ),
+  );
+  const ya34MemberIds = new Set(membersResponse.data.data.map((m: any) => m.id));
+
   const serviceTypes = [
     { id: this.SUNDAY_SERVICE_ID, name: 'Sunday Service' },
     { id: this.NORTH_SUNDAY_SERVICE_ID, name: 'North Sunday Service' },
@@ -255,19 +264,49 @@ export class PlanningCenterService {
   ];
 
   const responses = await Promise.all(
-    serviceTypes.map(type =>
-      firstValueFrom(
+    serviceTypes.map(async type => {
+      const res = await firstValueFrom(
         this.httpService.get(
           `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=future&per_page=50`,
           { headers: this.getAuthHeader() },
         ),
-      ).then(res => res.data.data.map((p: any) => ({
-        id: p.id,
-        date: p.attributes.sort_date,
-        title: p.attributes.title || type.name,
-        serviceType: type.name,
-      })))
-    )
+      );
+
+      return Promise.all(res.data.data.map(async (p: any) => {
+        try {
+          const teamRes = await firstValueFrom(
+            this.httpService.get(
+              `${this.baseUrl}/services/v2/service_types/${type.id}/plans/${p.id}/team_members?per_page=100`,
+              { headers: this.getAuthHeader() },
+            ),
+          );
+          const ya34Members = teamRes.data.data.filter(
+            (tm: any) => ya34MemberIds.has(tm.relationships.person.data.id),
+          );
+          return {
+            id: p.id,
+            date: p.attributes.sort_date,
+            title: p.attributes.title || type.name,
+            serviceType: type.name,
+            members: ya34Members.map((tm: any) => ({
+              name: tm.attributes.name,
+              position: tm.attributes.team_position_name,
+              status: tm.attributes.status === 'C' ? 'Confirmed' :
+                      tm.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+              photo: tm.attributes.photo_thumbnail,
+            })),
+          };
+        } catch {
+          return {
+            id: p.id,
+            date: p.attributes.sort_date,
+            title: p.attributes.title || type.name,
+            serviceType: type.name,
+            members: [],
+          };
+        }
+      }));
+    })
   );
 
   return responses.flat();

@@ -3,11 +3,19 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
+interface ServingMember {
+  name: string
+  position: string
+  status: string
+  photo: string
+}
+
 interface PlanEvent {
   id: string
   date: string
   title: string
   serviceType: string
+  members: ServingMember[]
 }
 
 function ChevronLeftIcon() {
@@ -42,6 +50,7 @@ export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [events, setEvents] = useState<PlanEvent[]>([])
+  const [selectedEvent, setSelectedEvent] = useState<PlanEvent | null>(null)
 
   useEffect(() => {
     fetch('http://localhost:3001/planning-center/all-plans')
@@ -159,12 +168,13 @@ export default function CalendarPage() {
                       </span>
                       <div className="mt-1 flex flex-col gap-1">
                         {dayEvents?.map(event => (
-                          <div
-                            key={event.id}
-                            className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 truncate"
-                          >
-                            {event.title} · {event.serviceType}
-                          </div>
+                            <div
+                                key={event.id}
+                                onClick={() => setSelectedEvent(event)}
+                                className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 truncate cursor-pointer hover:bg-blue-100 transition-colors"
+                            >
+                                {event.title} · {event.serviceType}
+                            </div>
                         ))}
                       </div>
                     </>
@@ -173,6 +183,61 @@ export default function CalendarPage() {
               )
             })}
           </div>
+          {selectedEvent && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+    onClick={() => setSelectedEvent(null)}
+  >
+    <div
+      className="bg-white rounded-xl shadow-xl p-6 w-80 max-h-[80vh] overflow-y-auto"
+      onClick={e => e.stopPropagation()}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <p className="text-sm font-bold text-gray-900">{selectedEvent.serviceType}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{selectedEvent.title} · {new Date(selectedEvent.date).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+        </div>
+        <button
+          onClick={() => setSelectedEvent(null)}
+          className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+        >
+          ✕
+        </button>
+      </div>
+
+      {selectedEvent.members.length === 0 ? (
+        <p className="text-sm text-gray-400 text-center py-4">No YA34 members serving.</p>
+      ) : (
+        <>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-3">YA34 Serving</p>
+          <div className="flex flex-col gap-2">
+            {selectedEvent.members.map((member, i) => (
+              <div key={i} className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <img
+                    src={member.photo}
+                    className="w-7 h-7 rounded-full object-cover shrink-0"
+                    alt={member.name}
+                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                  />
+                  <span className="text-sm font-medium text-gray-900 truncate">{member.name}</span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-xs text-gray-400">{member.position}</span>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    member.status === 'Confirmed' ? 'bg-emerald-50 text-emerald-700' :
+                    member.status === 'Declined' ? 'bg-red-50 text-red-700' :
+                    'bg-gray-100 text-gray-500'
+                  }`}>{member.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
         </div>
       </main>
     </div>
