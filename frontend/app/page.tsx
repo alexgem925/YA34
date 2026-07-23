@@ -33,7 +33,7 @@ interface UpcomingEvent {
 
 function UsersIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="w-4.5 h-4.5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
     </svg>
   )
@@ -41,7 +41,7 @@ function UsersIcon() {
 
 function CheckBadgeIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="w-4.5 h-4.5">
       <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 2.25 2.25 4.5-4.5m4.5 2.25a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
   )
@@ -49,24 +49,16 @@ function CheckBadgeIcon() {
 
 function CalendarIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} className="w-4.5 h-4.5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
     </svg>
   )
 }
 
-function GroupIcon() {
+function ChevronDownIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
-    </svg>
-  )
-}
-
-function SparkleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
     </svg>
   )
 }
@@ -81,11 +73,11 @@ function initials(name: string) {
 }
 
 const ACCENTS = [
-  { grad: 'from-fuchsia-500 to-pink-500', text: 'text-fuchsia-400', ring: 'ring-fuchsia-400/50', dot: 'bg-fuchsia-400', bar: 'bg-fuchsia-500' },
-  { grad: 'from-sky-500 to-cyan-400', text: 'text-cyan-400', ring: 'ring-cyan-400/50', dot: 'bg-cyan-400', bar: 'bg-sky-500' },
-  { grad: 'from-amber-400 to-orange-500', text: 'text-amber-400', ring: 'ring-amber-400/50', dot: 'bg-amber-400', bar: 'bg-amber-500' },
-  { grad: 'from-emerald-400 to-teal-500', text: 'text-emerald-400', ring: 'ring-emerald-400/50', dot: 'bg-emerald-400', bar: 'bg-emerald-500' },
-  { grad: 'from-violet-500 to-purple-500', text: 'text-violet-400', ring: 'ring-violet-400/50', dot: 'bg-violet-400', bar: 'bg-violet-500' },
+  { text: 'text-rose-700', avatarBg: 'bg-rose-100', avatarText: 'text-rose-700', solid: 'bg-rose-500' },
+  { text: 'text-blue-700', avatarBg: 'bg-blue-100', avatarText: 'text-blue-700', solid: 'bg-blue-500' },
+  { text: 'text-amber-700', avatarBg: 'bg-amber-100', avatarText: 'text-amber-700', solid: 'bg-amber-500' },
+  { text: 'text-emerald-700', avatarBg: 'bg-emerald-100', avatarText: 'text-emerald-700', solid: 'bg-emerald-500' },
+  { text: 'text-violet-700', avatarBg: 'bg-violet-100', avatarText: 'text-violet-700', solid: 'bg-violet-500' },
 ]
 
 function accentFor(key: string) {
@@ -101,7 +93,7 @@ function Avatar({ name, src, seed, size = 9 }: { name: string; src: string | nul
 
   if (!src || failed) {
     return (
-      <div className={`${sizeClass} rounded-full bg-linear-to-br ${accent.grad} flex items-center justify-center text-xs font-semibold text-white shrink-0 ring-2 ring-offset-2 ring-offset-gray-950 ${accent.ring}`}>
+      <div className={`${sizeClass} rounded-full ${accent.avatarBg} ${accent.avatarText} flex items-center justify-center text-xs font-bold shrink-0`}>
         {initials(name) || '?'}
       </div>
     )
@@ -110,7 +102,7 @@ function Avatar({ name, src, seed, size = 9 }: { name: string; src: string | nul
   return (
     <img
       src={src}
-      className={`${sizeClass} rounded-full object-cover shrink-0 ring-2 ring-offset-2 ring-offset-gray-950 ${accent.ring}`}
+      className={`${sizeClass} rounded-full object-cover shrink-0 ring-1 ring-gray-200`}
       alt={name}
       onError={() => setFailed(true)}
     />
@@ -118,14 +110,55 @@ function Avatar({ name, src, seed, size = 9 }: { name: string; src: string | nul
 }
 
 function SkeletonRow() {
-  return <div className="skeleton h-14 rounded-xl" />
+  return <div className="skeleton h-14 rounded-lg" />
 }
 
+const NAV_ITEMS = ['Dashboard', 'Members', 'Calendar', 'CG Plan']
+
 const STAT_META = [
-  { label: 'Total members', icon: <UsersIcon />, grad: 'from-sky-500 to-cyan-400', glow: 'shadow-cyan-500/20' },
-  { label: 'Serving this Sunday', icon: <CheckBadgeIcon />, grad: 'from-emerald-400 to-teal-500', glow: 'shadow-emerald-500/20' },
-  { label: 'Upcoming events', icon: <CalendarIcon />, grad: 'from-amber-400 to-orange-500', glow: 'shadow-amber-500/20' },
+  { label: 'Total members', icon: <UsersIcon />, iconBg: 'bg-blue-50', iconText: 'text-blue-600' },
+  { label: 'Serving this Sunday', icon: <CheckBadgeIcon />, iconBg: 'bg-emerald-50', iconText: 'text-emerald-600' },
+  { label: 'Upcoming events', icon: <CalendarIcon />, iconBg: 'bg-amber-50', iconText: 'text-amber-600' },
 ]
+
+function TopNav() {
+  return (
+    <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
+      <div className="relative max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 rounded-md bg-gray-900 flex items-center justify-center text-white text-sm font-bold">
+            Y
+          </div>
+          <span className="text-sm font-bold tracking-tight text-gray-900">YA34</span>
+        </div>
+
+        <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+          {NAV_ITEMS.map((item) => {
+            const active = item === 'Dashboard'
+            return (
+              <button
+                key={item}
+                type="button"
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  active ? 'bg-gray-100 text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                {item}
+              </button>
+            )
+          })}
+        </nav>
+
+        <button type="button" className="flex items-center gap-2 shrink-0 pl-1.5 pr-2 py-1 rounded-md hover:bg-gray-50 transition-colors">
+          <div className="w-7 h-7 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-xs font-bold">
+            JC
+          </div>
+          <ChevronDownIcon />
+        </button>
+      </div>
+    </header>
+  )
+}
 
 export default function Home() {
   const [people, setPeople] = useState<Person[]>([])
@@ -149,96 +182,76 @@ export default function Home() {
     people.length.toString(),
     people.filter((p) => p.servingThisSunday).length.toString(),
     events.length.toString(),
-    '12',
   ]
 
   return (
-    <main className="relative min-h-screen bg-gray-950 text-white overflow-hidden">
-      {/* Ambient background accents */}
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-32 -left-24 w-104 h-104 bg-fuchsia-600/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/4 -right-32 w-120 h-120 bg-blue-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      <TopNav />
 
-      <div className="relative px-6 py-10 md:px-10">
-
-        {/* Header */}
-        <div className="flex justify-between items-center pb-6 mb-8 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-fuchsia-500 via-violet-500 to-blue-500 flex items-center justify-center text-sm font-bold shadow-lg shadow-violet-500/30">
-              Y
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold tracking-tight bg-linear-to-r from-fuchsia-400 via-violet-300 to-blue-400 bg-clip-text text-transparent">
-                YA34
-              </h1>
-              <p className="text-xs text-gray-400">Leader dashboard</p>
-            </div>
-          </div>
+      <main className="max-w-7xl mx-auto px-6 py-8 md:px-10">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">Overview for YA3 + YA4</p>
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
           {STAT_META.map((stat, i) => (
-            <div
-              key={stat.label}
-              className={`relative overflow-hidden rounded-2xl bg-gray-900/60 backdrop-blur border border-white/5 p-5 hover:border-white/10 hover:-translate-y-0.5 transition-all duration-200 shadow-lg ${stat.glow}`}
-            >
-              <div className={`absolute inset-x-0 top-0 h-1 bg-linear-to-r ${stat.grad}`} />
-              <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${stat.grad} flex items-center justify-center mb-3 text-white shadow-md`}>
-                {stat.icon}
+            <div key={stat.label} className="rounded-lg bg-white border border-gray-200 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">{stat.label}</span>
+                <div className={`w-8 h-8 rounded-md ${stat.iconBg} ${stat.iconText} flex items-center justify-center shrink-0`}>
+                  {stat.icon}
+                </div>
               </div>
-              <p className="text-3xl font-semibold tracking-tight font-mono">{statValues[i]}</p>
-              <p className="text-sm text-gray-400 mt-0.5">{stat.label}</p>
+              <p className="text-3xl font-bold tracking-tight font-mono text-gray-900">{statValues[i]}</p>
             </div>
           ))}
         </div>
 
         {/* Main Grid */}
-        <div className="grid lg:grid-cols-2 gap-6 items-stretch">
+        <div className="grid lg:grid-cols-2 gap-8 items-stretch">
 
           {/* Members */}
-          <div className="rounded-2xl bg-gray-900/40 backdrop-blur border border-white/5 p-5 h-[600px] flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold">Members</h2>
-              <span className="text-xs text-gray-300 bg-linear-to-r from-fuchsia-500/20 to-violet-500/20 ring-1 ring-white/10 rounded-full px-2 py-0.5">YA3 + YA4</span>
+          <section className="rounded-lg bg-white border border-gray-200 p-5 h-150 flex flex-col">
+            <div className="flex items-center justify-between pb-3 mb-2 border-b border-gray-200">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Members</h2>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 rounded px-2 py-0.5">
+                YA3 + YA4
+              </span>
             </div>
-            <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 pr-1">
+            <div className="flex flex-col divide-y divide-gray-100 overflow-y-auto flex-1">
               {!peopleLoaded ? (
-                <>
+                <div className="flex flex-col gap-1.5 py-1">
                   <SkeletonRow />
                   <SkeletonRow />
                   <SkeletonRow />
                   <SkeletonRow />
-                </>
+                </div>
               ) : people.length === 0 ? (
-                <p className="text-sm text-gray-500 py-6 text-center">No members found.</p>
+                <p className="text-sm text-gray-400 py-6 text-center">No members found.</p>
               ) : (
                 people.map((person) => (
-                  <div
-                    key={person.id}
-                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors"
-                  >
+                  <div key={person.id} className="flex items-center gap-3 py-3 hover:bg-gray-50 transition-colors -mx-1 px-1">
                     <Avatar name={person.name} src={person.avatar} seed={person.id} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{person.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{person.email || person.phone || 'No contact info'}</p>
+                      <p className="text-sm font-semibold truncate text-gray-900">{person.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{person.email || person.phone || 'No contact info'}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                        {person.servingThisSunday ? (
+                      {person.servingThisSunday ? (
                         <>
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-linear-to-r from-emerald-500 to-teal-500 text-white font-medium shadow-sm shadow-emerald-500/30">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">
                             Serving Sunday
                           </span>
                           {person.roles.map((role, i) => (
-                            <span key={i} className="text-xs text-gray-500">
+                            <span key={i} className="text-[11px] text-gray-400">
                               {role.service} · {role.position} · {role.status}
                             </span>
                           ))}
                         </>
                       ) : (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-500 ring-1 ring-white/10 font-medium">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-gray-100 text-gray-400">
                           Not serving
                         </span>
                       )}
@@ -247,11 +260,13 @@ export default function Home() {
                 ))
               )}
             </div>
-          </div>
+          </section>
 
           {/* Upcoming Events */}
-          <div className="rounded-2xl bg-gray-900/40 backdrop-blur border border-white/5 p-5">
-            <h2 className="text-sm font-semibold mb-4">Upcoming events</h2>
+          <section className="rounded-lg bg-white border border-gray-200 p-5">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 pb-3 mb-4 border-b border-gray-200">
+              Upcoming Events
+            </h2>
             <div className="flex flex-col gap-3">
               {!eventsLoaded ? (
                 <>
@@ -260,30 +275,29 @@ export default function Home() {
                   <SkeletonRow />
                 </>
               ) : events.length === 0 ? (
-                <p className="text-sm text-gray-500 py-6 text-center">No upcoming events.</p>
+                <p className="text-sm text-gray-400 py-6 text-center">No upcoming events.</p>
               ) : (
                 events.map((event) => {
                   const accent = accentFor(event.date)
                   const eventMax = Math.max(...event.services.map((s) => s.peopleCount), 1)
                   return (
-                    <div key={event.date} className="relative overflow-hidden pl-3.5 py-3 pr-3.5 bg-white/2 border border-white/5 rounded-xl">
-                      <span className={`absolute left-0 top-0 bottom-0 w-1 ${accent.bar}`} />
-                      <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2.5">{event.date}</p>
+                    <div key={event.date} className={`border-l-2 ${accent.solid.replace('bg-', 'border-')} pl-3.5 py-3 pr-3.5 bg-gray-50 rounded-r-md`}>
+                      <p className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-2.5">{event.date}</p>
                       <div className="flex flex-col gap-2.5">
                         {event.services.map((service) => (
                           <div key={service.id} className="flex items-center gap-3">
-                            <span className={`w-1.5 h-1.5 rounded-full ${accent.dot} shrink-0`} />
+                            <span className={`w-1.5 h-1.5 rounded-full ${accent.solid} shrink-0`} />
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-2 mb-1">
                                 <div className="flex items-center gap-2 min-w-0">
-                                  <span className="text-sm font-medium truncate">{service.serviceType}</span>
-                                  <span className="text-xs text-gray-500 truncate">{service.title}</span>
+                                  <span className="text-sm font-semibold truncate text-gray-900">{service.serviceType}</span>
+                                  <span className="text-xs text-gray-400 truncate">{service.title}</span>
                                 </div>
-                                <span className="text-xs font-mono text-gray-300 shrink-0">{service.peopleCount}</span>
+                                <span className="text-xs font-mono text-gray-500 shrink-0">{service.peopleCount}</span>
                               </div>
-                              <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                              <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
                                 <div
-                                  className={`h-full rounded-full ${accent.bar}`}
+                                  className={`h-full rounded-full ${accent.solid}`}
                                   style={{ width: `${Math.max((service.peopleCount / eventMax) * 100, 6)}%` }}
                                 />
                               </div>
@@ -296,10 +310,10 @@ export default function Home() {
                 })
               )}
             </div>
-          </div>
+          </section>
 
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }
