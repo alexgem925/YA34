@@ -168,7 +168,7 @@ function TopNav() {
 export default function Home() {
   const [people, setPeople] = useState<Person[]>([])
   const [peopleLoaded, setPeopleLoaded] = useState(false)
-  const [events, setEvents] = useState<UpcomingEvent[]>([])
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([])
   const [eventsLoaded, setEventsLoaded] = useState(false)
 
   useEffect(() => {
@@ -179,14 +179,14 @@ export default function Home() {
 
     fetch('http://localhost:3001/planning-center/upcoming-events')
       .then((res) => res.json())
-      .then((data) => setEvents(data))
+      .then((data) => setUpcomingEvents(data))
       .finally(() => setEventsLoaded(true))
   }, [])
 
   const statValues = [
     people.length.toString(),
     people.filter((p) => p.servingThisSunday).length.toString(),
-    events.length.toString(),
+    upcomingEvents.length.toString(),
   ]
 
   return (
@@ -290,10 +290,10 @@ export default function Home() {
                   <SkeletonRow />
                   <SkeletonRow />
                 </>
-              ) : events.length === 0 ? (
+              ) : upcomingEvents.length === 0 ? (
                 <p className="text-sm text-gray-400 py-6 text-center">No upcoming events.</p>
               ) : (
-                events.map((event) => {
+                upcomingEvents.map((event) => {
                   const accent = accentFor(event.date)
                   return (
                     <div key={event.date} className={`border-l-2 ${accent.solid.replace('bg-', 'border-')} pl-3.5 py-3 pr-3.5 bg-gray-50 rounded-r-md`}>
