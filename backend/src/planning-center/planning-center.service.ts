@@ -247,7 +247,6 @@ export class PlanningCenterService {
   }
 
   async getAllServicePlans() {
-  // Get YA34 members first
   const membersResponse = await firstValueFrom(
     this.httpService.get(
       `${this.baseUrl}/services/v2/people?where[tag_ids][]=${this.YA3_TAG_ID}&where[tag_ids][]=${this.YA4_TAG_ID}&per_page=100`,
@@ -265,14 +264,23 @@ export class PlanningCenterService {
 
   const responses = await Promise.all(
     serviceTypes.map(async type => {
-      const res = await firstValueFrom(
-        this.httpService.get(
-          `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=future&per_page=50`,
-          { headers: this.getAuthHeader() },
+      const [futureRes, pastRes] = await Promise.all([
+        firstValueFrom(
+          this.httpService.get(
+            `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=future&per_page=25`,
+            { headers: this.getAuthHeader() },
+          ),
         ),
-      );
+        firstValueFrom(
+          this.httpService.get(
+            `${this.baseUrl}/services/v2/service_types/${type.id}/plans?filter=past&per_page=100&order=-sort_date`,
+            { headers: this.getAuthHeader() },
+          ),
+        ),
+      ]);
 
-      return Promise.all(res.data.data.map(async (p: any) => {
+      // Fetch team members only for future plans
+      const futurePlans = await Promise.all(futureRes.data.data.map(async (p: any) => {
         try {
           const teamRes = await firstValueFrom(
             this.httpService.get(
@@ -306,6 +314,17 @@ export class PlanningCenterService {
           };
         }
       }));
+
+      // Past plans — no team member fetch needed
+      const pastPlans = pastRes.data.data.map((p: any) => ({
+        id: p.id,
+        date: p.attributes.sort_date,
+        title: p.attributes.title || type.name,
+        serviceType: type.name,
+        members: [],
+      }));
+
+      return [...futurePlans, ...pastPlans];
     })
   );
 
