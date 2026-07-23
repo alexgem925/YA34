@@ -163,36 +163,44 @@ export class PlanningCenterService {
 
   // For each plan, fetch team members and count YA34 members
   const processPlan = async (p: any, serviceType: string) => {
-    const serviceTypeId = serviceType === 'Sunday Service' ? this.SUNDAY_SERVICE_ID : this.NORTH_SUNDAY_SERVICE_ID;
-    try {
-      const teamResponse = await firstValueFrom(
-        this.httpService.get(
-          `${this.baseUrl}/services/v2/service_types/${serviceTypeId}/plans/${p.id}/team_members?per_page=100`,
-          { headers: this.getAuthHeader() },
-        ),
-      );
-      const ya34Count = teamResponse.data.data.filter(
-        (tm: any) => ya34MemberIds.has(tm.relationships.person.data.id),
-      ).length;
-      return {
-        id: p.id,
-        date: p.attributes.dates,
-        sortDate: p.attributes.sort_date,
-        title: p.attributes.title,
-        serviceType,
-        peopleCount: ya34Count,
-      };
-    } catch {
-      return {
-        id: p.id,
-        date: p.attributes.dates,
-        sortDate: p.attributes.sort_date,
-        title: p.attributes.title,
-        serviceType,
-        peopleCount: 0,
-      };
-    }
-  };
+  const serviceTypeId = serviceType === 'Sunday Service' ? this.SUNDAY_SERVICE_ID : this.NORTH_SUNDAY_SERVICE_ID;
+  try {
+    const teamResponse = await firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/${serviceTypeId}/plans/${p.id}/team_members?per_page=100`,
+        { headers: this.getAuthHeader() },
+      ),
+    );
+    const ya34Members = teamResponse.data.data.filter(
+      (tm: any) => ya34MemberIds.has(tm.relationships.person.data.id),
+    );
+    return {
+      id: p.id,
+      date: p.attributes.dates,
+      sortDate: p.attributes.sort_date,
+      title: p.attributes.title,
+      serviceType,
+      peopleCount: ya34Members.length,
+      members: ya34Members.map((tm: any) => ({
+        name: tm.attributes.name,
+        position: tm.attributes.team_position_name,
+        status: tm.attributes.status === 'C' ? 'Confirmed' :
+                tm.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
+        photo: tm.attributes.photo_thumbnail,
+      })),
+    };
+  } catch {
+    return {
+      id: p.id,
+      date: p.attributes.dates,
+      sortDate: p.attributes.sort_date,
+      title: p.attributes.title,
+      serviceType,
+      peopleCount: 0,
+      members: [],
+    };
+  }
+};
 
   const allPlans = await Promise.all([
     ...mainResponse.data.data.map((p: any) => processPlan(p, 'Sunday Service')),

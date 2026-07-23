@@ -19,11 +19,19 @@ interface Person {
   roles: Role[]
 }
 
+interface ServingMember {
+  name: string
+  position: string
+  status: string
+  photo: string
+}
+
 interface ServiceTime {
   id: string
   title: string
   serviceType: string
   peopleCount: number
+  members: ServingMember[]
 }
 
 interface UpcomingEvent {
@@ -285,23 +293,46 @@ export default function Home() {
                       <p className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-2.5">{event.date}</p>
                       <div className="flex flex-col gap-2.5">
                         {event.services.map((service) => (
-                          <div key={service.id} className="flex items-center gap-3">
+                          <div key={service.id} className="relative flex items-center gap-3 group cursor-pointer rounded-md px-2 py-1.5 -mx-2 hover:bg-gray-100 transition-colors">
                             <span className={`w-1.5 h-1.5 rounded-full ${accent.solid} shrink-0`} />
                             <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between gap-2 mb-1">
+                              <div className="flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2 min-w-0">
                                   <span className="text-sm font-semibold truncate text-gray-900">{service.serviceType}</span>
                                   <span className="text-xs text-gray-400 truncate">{service.title}</span>
                                 </div>
                                 <span className="text-xs font-mono text-gray-500 shrink-0">{service.peopleCount}</span>
                               </div>
-                              <div className="h-1.5 rounded-full bg-gray-200 overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full ${accent.solid}`}
-                                  style={{ width: `${Math.max((service.peopleCount / eventMax) * 100, 6)}%` }}
-                                />
-                              </div>
                             </div>
+
+                            {service.members.length > 0 && (
+                              <div className="absolute left-0 top-full mt-1 z-20 hidden group-hover:block w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">YA34 Serving</p>
+                                <div className="flex flex-col gap-1.5">
+                                  {service.members.map((member, i) => (
+                                    <div key={i} className="flex items-center justify-between gap-2">
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <img
+                                          src={member.photo}
+                                          className="w-5 h-5 rounded-full object-cover shrink-0"
+                                          alt={member.name}
+                                          onError={(e) => (e.currentTarget.style.display = 'none')}
+                                        />
+                                        <span className="text-xs font-medium text-gray-900 truncate">{member.name}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5 shrink-0">
+                                        <span className="text-[10px] text-gray-400">{member.position}</span>
+                                        <span className={`text-[10px] font-bold px-1 rounded ${
+                                          member.status === 'Confirmed' ? 'bg-emerald-50 text-emerald-700' :
+                                          member.status === 'Declined' ? 'bg-red-50 text-red-700' :
+                                          'bg-gray-100 text-gray-500'
+                                        }`}>{member.status}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
