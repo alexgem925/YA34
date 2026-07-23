@@ -59,7 +59,16 @@ export class PlanningCenterService {
 
     const teamMembers930 = plan930Response.data.data;
     const teamMembers1130 = plan1130Response.data.data;
-
+    // Fetch team names
+    const teamsResponse = await firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/${this.SUNDAY_SERVICE_ID}/teams`,
+        { headers: this.getAuthHeader() },
+      ),
+    );
+    const teamMap = new Map(
+      teamsResponse.data.data.map((t: any) => [t.id, t.attributes.name])
+    );
     // Step 3: Enrich each member with their People profile and service status
     const enriched = await Promise.all(
       members.map(async (member: any) => {
@@ -89,16 +98,18 @@ export class PlanningCenterService {
             status: profile.attributes.status,
             email,
             phone,
-            servingThisSunday: serving930.length > 0 || serving1130.length > 0,
+            servingThisSunday: serving930.some((s: any) => s.attributes.status !== 'D') || serving1130.some((s: any) => s.attributes.status !== 'D'),
             roles: [
               ...serving930.map((s: any) => ({
                 position: s.attributes.team_position_name,
+                department: teamMap.get(s.relationships.team.data.id) || 'Unknown',
                 service: '9:30am',
                 status: s.attributes.status === 'C' ? 'Confirmed' :
                         s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
               })),
               ...serving1130.map((s: any) => ({
                 position: s.attributes.team_position_name,
+                department: teamMap.get(s.relationships.team.data.id) || 'Unknown',
                 service: '11:30am',
                 status: s.attributes.status === 'C' ? 'Confirmed' :
                         s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
@@ -113,16 +124,18 @@ export class PlanningCenterService {
             status: member.attributes.status,
             email: null,
             phone: null,
-            servingThisSunday: serving930.length > 0 || serving1130.length > 0,
+            servingThisSunday: serving930.some((s: any) => s.attributes.status !== 'D') || serving1130.some((s: any) => s.attributes.status !== 'D'),
             roles: [
               ...serving930.map((s: any) => ({
                 position: s.attributes.team_position_name,
+                department: teamMap.get(s.relationships.team.data.id) || 'Unknown',
                 service: '9:30am',
                 status: s.attributes.status === 'C' ? 'Confirmed' :
                         s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
               })),
               ...serving1130.map((s: any) => ({
                 position: s.attributes.team_position_name,
+                department: teamMap.get(s.relationships.team.data.id) || 'Unknown',
                 service: '11:30am',
                 status: s.attributes.status === 'C' ? 'Confirmed' :
                         s.attributes.status === 'D' ? 'Declined' : 'Unconfirmed',
