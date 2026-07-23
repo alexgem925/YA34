@@ -137,56 +137,83 @@ export class PlanningCenterService {
   }
 
   async getUpcomingEvents() {
-    const [mainResponse, northResponse] = await Promise.all([
-      firstValueFrom(
-        this.httpService.get(
-          `${this.baseUrl}/services/v2/service_types/${this.SUNDAY_SERVICE_ID}/plans?filter=future&per_page=20`,
-          { headers: this.getAuthHeader() },
-        ),
-      ),
-      firstValueFrom(
-        this.httpService.get(
-          `${this.baseUrl}/services/v2/service_types/${this.NORTH_SUNDAY_SERVICE_ID}/plans?filter=future&per_page=20`,
-          { headers: this.getAuthHeader() },
-        ),
-      ),
-    ]);
+  // Get YA34 members first
+  const membersResponse = await firstValueFrom(
+    this.httpService.get(
+      `${this.baseUrl}/services/v2/people?where[tag_ids][]=${this.YA3_TAG_ID}&where[tag_ids][]=${this.YA4_TAG_ID}&per_page=100`,
+      { headers: this.getAuthHeader() },
+    ),
+  );
+  const ya34MemberIds = new Set(membersResponse.data.data.map((m: any) => m.id));
 
-    const allPlans = [
-      ...mainResponse.data.data.map((p: any) => ({
+  const [mainResponse, northResponse] = await Promise.all([
+    firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/${this.SUNDAY_SERVICE_ID}/plans?filter=future&per_page=20`,
+        { headers: this.getAuthHeader() },
+      ),
+    ),
+    firstValueFrom(
+      this.httpService.get(
+        `${this.baseUrl}/services/v2/service_types/${this.NORTH_SUNDAY_SERVICE_ID}/plans?filter=future&per_page=20`,
+        { headers: this.getAuthHeader() },
+      ),
+    ),
+  ]);
+
+  // For each plan, fetch team members and count YA34 members
+  const processPlan = async (p: any, serviceType: string) => {
+    const serviceTypeId = serviceType === 'Sunday Service' ? this.SUNDAY_SERVICE_ID : this.NORTH_SUNDAY_SERVICE_ID;
+    try {
+      const teamResponse = await firstValueFrom(
+        this.httpService.get(
+          `${this.baseUrl}/services/v2/service_types/${serviceTypeId}/plans/${p.id}/team_members?per_page=100`,
+          { headers: this.getAuthHeader() },
+        ),
+      );
+      const ya34Count = teamResponse.data.data.filter(
+        (tm: any) => ya34MemberIds.has(tm.relationships.person.data.id),
+      ).length;
+      return {
         id: p.id,
         date: p.attributes.dates,
         sortDate: p.attributes.sort_date,
         title: p.attributes.title,
-        serviceType: 'Sunday Service',
-        peopleCount: p.attributes.plan_people_count,
-      })),
-      ...northResponse.data.data.map((p: any) => ({
+        serviceType,
+        peopleCount: ya34Count,
+      };
+    } catch {
+      return {
         id: p.id,
         date: p.attributes.dates,
         sortDate: p.attributes.sort_date,
         title: p.attributes.title,
-        serviceType: 'North Sunday Service',
-        peopleCount: p.attributes.plan_people_count,
-      })),
-    ];
-
-    // Group by date
-    const grouped: Record<string, any[]> = {};
-    for (const plan of allPlans) {
-      if (!grouped[plan.date]) grouped[plan.date] = [];
-      grouped[plan.date].push(plan);
+        serviceType,
+        peopleCount: 0,
+      };
     }
+  };
 
-    // Sort by date and return next 4
-    return Object.entries(grouped)
-      .sort(([, a], [, b]) => new Date(a[0].sortDate).getTime() - new Date(b[0].sortDate).getTime())
-      .slice(0, 4)
-      .map(([date, services]) => ({
-        date,
-        services: services.sort((a, b) => b.title.localeCompare(a.title)),
-      }));
+  const allPlans = await Promise.all([
+    ...mainResponse.data.data.map((p: any) => processPlan(p, 'Sunday Service')),
+    ...northResponse.data.data.map((p: any) => processPlan(p, 'North Sunday Service')),
+  ]);
+
+  // Group by date
+  const grouped: Record<string, any[]> = {};
+  for (const plan of allPlans) {
+    if (!grouped[plan.date]) grouped[plan.date] = [];
+    grouped[plan.date].push(plan);
   }
+
+  return Object.entries(grouped)
+    .sort(([, a], [, b]) => new Date(a[0].sortDate).getTime() - new Date(b[0].sortDate).getTime())
+    .slice(0, 4)
+    .map(([date, services]) => ({
+      date,
+      services: services.sort((a, b) => b.title.localeCompare(a.title)),
+    }));
+}
 
   async getPersonDetails(personId: string) {
     const response = await firstValueFrom(

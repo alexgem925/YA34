@@ -132,7 +132,7 @@ function TopNav() {
           <span className="text-sm font-bold tracking-tight text-gray-900">YA34</span>
         </div>
 
-        <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+        <nav className="hidden md:flex items-center gap-1 ml-8">
           {NAV_ITEMS.map((item) => {
             const active = item === 'Dashboard'
             return (
@@ -190,7 +190,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-6 py-8 md:px-10">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Planning Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Overview for YA3 + YA4</p>
         </div>
 
@@ -213,7 +213,7 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-8 items-stretch">
 
           {/* Members */}
-          <section className="rounded-lg bg-white border border-gray-200 p-5 h-150 flex flex-col">
+          <section className="rounded-lg bg-white border border-gray-200 p-5 h-[600px] flex flex-col">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-gray-200">
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Members</h2>
               <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 rounded px-2 py-0.5">
